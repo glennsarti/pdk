@@ -134,7 +134,7 @@ module PDK
             argv = ['lock']
 
             cmd = bundle_command(*argv).tap do |c|
-              c.add_spinner(_('Resolving default Gemfile dependencies.'))
+              c.ui_job = PDK.ui.register_job(_('Resolving default Gemfile dependencies.'), nil)
             end
 
             result = cmd.execute!
@@ -195,7 +195,7 @@ module PDK
           argv << '-j4' unless Gem.win_platform? && Gem::Version.new(PDK::Util::RubyVersion.active_ruby_version) < Gem::Version.new('2.3.5')
 
           cmd = bundle_command(*argv).tap do |c|
-            c.add_spinner(_('Installing missing Gemfile dependencies.'))
+            c.ui_job = PDK.ui.register_job(_('Installing missing Gemfile dependencies.'), nil)
             c.update_environment(gemfile_env(gem_overrides)) unless gem_overrides.empty?
           end
 

@@ -1,0 +1,6 @@
+{
+  "name": "new_cli",
+  "plugin_type": "cli",
+  "dependencies": [],
+  "root_file": "new_cli.rb"
+}

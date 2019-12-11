@@ -1,0 +1,6 @@
+{
+  "name": "puppet_class_generator",
+  "plugin_type": "generator",
+  "dependencies": [],
+  "root_file": "plugin.rb"
+}

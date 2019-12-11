@@ -11,6 +11,8 @@ else
   gem 'nokogiri', '~> 1.10.4' # rubocop:disable Bundler/DuplicatedGem
 end
 
+gem 'pdk-plugin-core', path: 'vendor/pdk-plugin-core'
+
 group :development do
   gem 'activesupport', '4.2.9'
   gem 'github_changelog_generator', '~> 1.14'

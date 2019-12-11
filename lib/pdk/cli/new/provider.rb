@@ -11,7 +11,7 @@ module PDK::CLI
       module_dir = Dir.pwd
 
       if provider_name.nil? || provider_name.empty?
-        puts command.help
+        PDK.ui.puts command.help
         exit 1
       end
 

@@ -5,7 +5,8 @@ module PDK
   autoload :AnswerFile, 'pdk/answer_file'
   autoload :Config, 'pdk/config'
   autoload :Generate, 'pdk/generate'
-  autoload :Logger, 'pdk/logger'
+  #autoload :Logger, 'pdk/logger'
+  autoload :FileUpdateManager, 'pdk/file_update_manager'
   autoload :Module, 'pdk/module'
   autoload :Report, 'pdk/report'
   autoload :TemplateFile, 'pdk/template_file'
@@ -28,6 +29,12 @@ module PDK
     autoload :Unit, 'pdk/tests/unit'
   end
 
+  module Logger; end
+
+  module UI; end
+  require 'pdk/ui'
+  #autoload :UI, 'pdk/ui'
+
   # Singleton accessor to the current answer file being used by the PDK.
   #
   # @return [PDK::AnswerFile] The AnswerFile instance currently being used by
@@ -42,10 +49,6 @@ module PDK
   #   answers to interactive questions.
   def self.answer_file=(path)
     @answer_file = PDK::AnswerFile.new(path)
-  end
-
-  def self.logger
-    @logger ||= PDK::Logger.new
   end
 
   def self.config
@@ -63,5 +66,39 @@ module PDK
       app_version:   PDK::VERSION,
       app_installer: PDK::Util.package_install? ? 'package' : 'gem',
     )
+  end
+
+  # Should be last-ish
+  require 'pdk/plugins'
+  PDK::PluginManager.instance.find_all_plugins
+
+  # These NEED the plugins to be loaded first
+  # So it HAS to be after `PDK::PluginManager.instance.find_all_plugins`
+  def self.ui
+    return @ui unless @ui.nil?
+
+    plugin_name = plugin_name_from_env('PDK_UI_PLUGIN', 'default_ui')
+    PDK::PluginManager.instance.activate_plugins!([plugin_name])
+    plugin = PDK::PluginManager.instance[plugin_name]
+
+    @ui = plugin.ui_klass.new
+  end
+
+  def self.logger
+    return @logger unless @logger.nil?
+
+    plugin_name = plugin_name_from_env('PDK_LOGGER_PLUGIN', 'default_logger')
+    PDK::PluginManager.instance.activate_plugins!([plugin_name])
+    plugin = PDK::PluginManager.instance[plugin_name]
+
+    @logger = plugin.logger_klass.new
+  end
+
+  # TODO: private.  Perhaps PDK::Logger module is better for this?
+  def self.plugin_name_from_env(env_var, default)
+    var_val = ENV[env_var]
+    return default if var_val.nil?
+    return default if PDK::PluginManager.instance.plugin_metadata(var_val).nil?
+    var_val
   end
 end

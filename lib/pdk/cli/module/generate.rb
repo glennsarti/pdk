@@ -15,7 +15,7 @@ module PDK::CLI
       module_name = args[0]
 
       if module_name.nil? || module_name.empty?
-        puts command.help
+        PDK.ui.puts command.help
         exit 1
       end
 
