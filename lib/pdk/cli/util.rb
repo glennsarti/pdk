@@ -7,7 +7,6 @@ module PDK
       autoload :OptionNormalizer, 'pdk/cli/util/option_normalizer'
       autoload :OptionValidator, 'pdk/cli/util/option_validator'
       autoload :Interview, 'pdk/cli/util/interview'
-      #autoload :Spinner, 'pdk/cli/util/spinner'
 
       # Ensures the calling code is being run from inside a module directory.
       #
