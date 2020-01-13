@@ -25,8 +25,7 @@ module PDK
 
       def activate!
         @activated = true
-# DEBUG
-puts("Activated PDK Plugin #{name}")
+        PDK::PluginManager.instance.logger.info("Activated PDK Plugin #{name}")
       end
     end
   end

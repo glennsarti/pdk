@@ -1,0 +1,6 @@
+{
+  "name": "build_powershell_integration_cli",
+  "plugin_type": "cli",
+  "dependencies": ["build_cli"],
+  "root_file": "plugin.rb"
+}

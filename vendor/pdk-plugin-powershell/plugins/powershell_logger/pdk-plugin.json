@@ -1,0 +1,6 @@
+{
+  "name": "powershell_logger",
+  "plugin_type": "logger",
+  "dependencies": [],
+  "root_file": "plugin.rb"
+}

@@ -4,6 +4,7 @@ require 'pdk/plugin_types/plugin'
 
 module PDK
   module PluginTypes
+    autoload :Builder,   'pdk/plugin_types/builder'
     autoload :CLI,       'pdk/plugin_types/cli'
     autoload :Generator, 'pdk/plugin_types/generator'
     autoload :Logger,    'pdk/plugin_types/logger'
@@ -18,9 +19,14 @@ module PDK
   class PluginManager
     include Singleton
 
+    attr_reader :logger
+
     def initialize
       @plugins_metadata = {}
       @plugins = {}
+
+      require 'logger'
+      @logger = ENV['PDK_PLUGIN_DEBUG'].nil? ? ::Logger.new(File.open(File::NULL, 'w')) : ::Logger.new($stdout)
     end
 
     def find_all_plugins
@@ -31,7 +37,7 @@ module PDK
           metadata['plugin_path'] = File.dirname(metadata_path)
 
           if @plugins_metadata[metadata['name']]
-            puts ("#{metadata['name']} plugin is duplicated by #{metadata_path}") # TODO : How to log this?
+            logger.warn("#{metadata['name']} plugin is duplicated by #{metadata_path}") # TODO : How to log this?
           else
             @plugins_metadata[metadata['name']] = metadata
           end
@@ -45,7 +51,7 @@ module PDK
       raise "Unknown plugin name #{plugin.name}" if @plugins_metadata[plugin.name].nil?
       unless @plugins[plugin.name].nil?
         raise "#{plugin.name} is already registered" if raise_on_reregister
-puts ("#{plugin.name} is already registered") # TODO : How to log this?
+        logger.error("#{plugin.name} is already registered") # TODO : How to log this?
         return
       end
 
@@ -72,7 +78,7 @@ puts ("#{plugin.name} is already registered") # TODO : How to log this?
 
       unactivated = @plugins.select { |name, plugin| plugin_names.include?(name) && !plugin.activated? }
       return if unactivated.empty?
-  puts ("The plugin/s #{unactivated.keys.join(', ')} could not be activated") # TODO : How to log this?
+      logger.error("The plugin/s #{unactivated.keys.join(', ')} could not be activated") # TODO : How to log this?
     end
 
     # TODO: Private

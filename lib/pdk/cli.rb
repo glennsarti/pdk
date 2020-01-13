@@ -158,7 +158,7 @@ module PDK::CLI
   end
 
   require 'pdk/cli/bundle'
-  require 'pdk/cli/build'
+  #require 'pdk/cli/build'
   require 'pdk/cli/config'
   require 'pdk/cli/convert'
   #require 'pdk/cli/new'

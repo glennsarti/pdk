@@ -12,8 +12,11 @@ else
 end
 
 # TODO: Figure out some dynamic loading?
-gem 'pdk-plugin-core',          path: 'vendor/pdk-plugin-core'
-gem 'pdk-plugin-legacy-module', path: 'vendor/pdk-plugin-legacy-module'
+gem 'pdk-plugin-core',           path: 'vendor/pdk-plugin-core'
+gem 'pdk-plugin-legacy-module',  path: 'vendor/pdk-plugin-legacy-module'
+gem 'pdk-plugin-module-builder', path: 'vendor/pdk-plugin-module-builder'
+gem 'pdk-plugin-powershell',     path: 'vendor/pdk-plugin-powershell'
+gem 'puppet_module_builder',     path: 'vendor/puppet_module_builder'
 
 group :development do
   gem 'activesupport', '4.2.9'

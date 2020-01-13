@@ -3,6 +3,7 @@ require 'pdk/i18n'
 module PDK
   autoload :Analytics, 'pdk/analytics'
   autoload :AnswerFile, 'pdk/answer_file'
+  autoload :Build, 'pdk/build'
   autoload :Config, 'pdk/config'
   autoload :Generate, 'pdk/generate'
   #autoload :Logger, 'pdk/logger'

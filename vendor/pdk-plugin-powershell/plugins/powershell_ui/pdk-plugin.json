@@ -1,0 +1,6 @@
+{
+  "name": "powershell_ui",
+  "plugin_type": "ui",
+  "dependencies": [],
+  "root_file": "plugin.rb"
+}
