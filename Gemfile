@@ -11,7 +11,9 @@ else
   gem 'nokogiri', '~> 1.10.4' # rubocop:disable Bundler/DuplicatedGem
 end
 
-gem 'pdk-plugin-core', path: 'vendor/pdk-plugin-core'
+# TODO: Figure out some dynamic loading?
+gem 'pdk-plugin-core',          path: 'vendor/pdk-plugin-core'
+gem 'pdk-plugin-legacy-module', path: 'vendor/pdk-plugin-legacy-module'
 
 group :development do
   gem 'activesupport', '4.2.9'
