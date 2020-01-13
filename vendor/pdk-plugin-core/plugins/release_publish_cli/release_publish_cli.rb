@@ -1,7 +1,7 @@
-require 'pdk/plugins'
+require 'pdk'
 
 module PDKCorePlugins
-  class ReleasePublishCLIPlugin < PDK::CLIPlugin
+  class ReleasePublishCLIPlugin < PDK::PluginTypes::CLI
     def initialize
       super(:release_publish_cli)
     end

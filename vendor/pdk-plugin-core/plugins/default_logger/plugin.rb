@@ -1,4 +1,4 @@
-require 'pdk/plugins'
+require 'pdk'
 
 # Setup the autoloaders. Not the greatest, but meh!
 module PDK
@@ -8,7 +8,7 @@ module PDK
 end
 
 module PDKCorePlugins
-  class DefaultLogger < PDK::LoggerPlugin
+  class DefaultLogger < PDK::PluginTypes::Logger
     def initialize
       super('default_logger')
     end

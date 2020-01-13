@@ -1,12 +1,3 @@
-
-# module PDK
-#   class UI
-#     def puts(*args)
-#       $stdout.puts "\e[35m", args, "\e[0m"
-#     end
-#   end
-# end
-
 module PDK
   module UI
     class BaseUI
@@ -23,7 +14,7 @@ module PDK
       end
 
       def register_job(message, parent_job = nil)
-        # TODO: Should be wrapped in a mutex
+        # TODO: Should be wrapped in a mutex??
         new_job = job_klass.new(self, message, parent_job, job_default_options)
         @ui_jobs << new_job
         parent_job.add_child_job(new_job) unless parent_job.nil?
@@ -53,7 +44,6 @@ module PDK
         @parent_job = parent_job
         @child_jobs = []
         @options = options
-        #@id = object_id.to_s
       end
 
       def stop(_success, _message = nil); end
@@ -64,7 +54,7 @@ module PDK
 
       # @api private
       def add_child_job(job)
-        # TODO: Should be wrapped in a mutex
+        # TODO: Should be wrapped in a mutex??
         @child_jobs << job
       end
     end

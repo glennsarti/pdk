@@ -1,7 +1,7 @@
-require 'pdk/plugins'
+require 'pdk'
 
 module PDKCorePlugins
-  class NewTaskCLIPlugin < PDK::CLIPlugin
+  class NewTaskCLIPlugin < PDK::PluginTypes::CLI
     def initialize
       super('new_task_cli')
     end

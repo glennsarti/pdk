@@ -1,4 +1,4 @@
-require 'pdk/plugins'
+require 'pdk'
 
 # Setup the autoloaders. Not the greatest, but meh!
 module PDK
@@ -10,7 +10,7 @@ module PDK
 end
 
 module PDKCorePlugins
-  class TasksValidatorPlugin < PDK::ValidatorPlugin
+  class TasksValidatorPlugin < PDK::PluginTypes::Validator
     def initialize
       super('tasks_validator')
     end

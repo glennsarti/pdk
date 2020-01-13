@@ -1,7 +1,7 @@
-require 'pdk/plugins'
+require 'pdk'
 
 module PDKCorePlugins
-  class NewTestCLIPlugin < PDK::CLIPlugin
+  class NewTestCLIPlugin < PDK::PluginTypes::CLI
     def initialize
       super('new_test_cli')
     end

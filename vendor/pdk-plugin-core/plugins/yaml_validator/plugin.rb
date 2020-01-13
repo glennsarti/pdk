@@ -1,4 +1,4 @@
-require 'pdk/plugins'
+require 'pdk'
 
 # Setup the autoloaders. Not the greatest, but meh!
 module PDK
@@ -9,7 +9,7 @@ module PDK
 end
 
 module PDKCorePlugins
-  class YamlValidatorPlugin < PDK::ValidatorPlugin
+  class YamlValidatorPlugin < PDK::PluginTypes::Validator
     def initialize
       super('yaml_validator')
     end

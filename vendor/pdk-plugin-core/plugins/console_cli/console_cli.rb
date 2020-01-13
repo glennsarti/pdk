@@ -1,7 +1,7 @@
-require 'pdk/plugins'
+require 'pdk'
 
 module PDKCorePlugins
-  class ConsoleCLIPlugin < PDK::CLIPlugin
+  class ConsoleCLIPlugin < PDK::PluginTypes::CLI
     def initialize
       super(:console_cli)
     end

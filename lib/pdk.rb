@@ -69,7 +69,7 @@ module PDK
   end
 
   # Should be last-ish
-  require 'pdk/plugins'
+  require 'pdk/plugin_manager'
   PDK::PluginManager.instance.find_all_plugins
 
   # These NEED the plugins to be loaded first

@@ -1,5 +1,4 @@
-require 'pdk/plugins'
-
+require 'pdk'
 
 # Setup the autoloaders. Not the greatest, but meh!
 module PDK
@@ -9,7 +8,7 @@ module PDK
 end
 
 module PDKCorePlugins
-  class PuppetClassGeneratorPlugin < PDK::GeneratorPlugin
+  class PuppetClassGeneratorPlugin < PDK::PluginTypes::Generator
     def initialize
       super('puppet_class_generator')
     end

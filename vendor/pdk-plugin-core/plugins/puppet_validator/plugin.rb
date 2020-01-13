@@ -1,4 +1,4 @@
-require 'pdk/plugins'
+require 'pdk'
 
 # Setup the autoloaders. Not the greatest, but meh!
 module PDK
@@ -11,7 +11,7 @@ module PDK
 end
 
 module PDKCorePlugins
-  class PuppetValidatorPlugin < PDK::ValidatorPlugin
+  class PuppetValidatorPlugin < PDK::PluginTypes::Validator
     def initialize
       super('puppet_validator')
     end

@@ -1,10 +1,6 @@
-#lib = File.expand_path('lib', __dir__)
-#$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-#require 'pdk/version'
-
 Gem::Specification.new do |spec|
   spec.name    = 'pdk-plugin-core'
-  spec.version = '0.0.1' # This doesn't make much sense
+  spec.version = '0.0.1' # This doesn't make much sense?!
   spec.authors = ['Puppet, Inc.']
   spec.email   = ['pdk-maintainers@puppet.com']
 

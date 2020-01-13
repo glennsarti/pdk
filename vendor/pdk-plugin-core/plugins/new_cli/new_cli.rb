@@ -1,7 +1,7 @@
-require 'pdk/plugins'
+require 'pdk'
 
 module PDKCorePlugins
-  class NewCLIPlugin < PDK::CLIPlugin
+  class NewCLIPlugin < PDK::PluginTypes::CLI
     def initialize
       super('new_cli')
     end
@@ -13,6 +13,8 @@ module PDKCorePlugins
         summary _('create a new module, etc.')
         description _('Creates a new <thing> using relevant options.')
         default_subcommand 'help'
+      end.tap do |cmd|
+        cmd.add_command Cri::Command.new_basic_help
       end
     end
   end
