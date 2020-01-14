@@ -7,7 +7,6 @@ module PDK
       autoload :OptionNormalizer, 'pdk/cli/util/option_normalizer'
       autoload :OptionValidator, 'pdk/cli/util/option_validator'
       autoload :Interview, 'pdk/cli/util/interview'
-      autoload :Spinner, 'pdk/cli/util/spinner'
 
       # Ensures the calling code is being run from inside a module directory.
       #
@@ -26,17 +25,6 @@ module PDK
         raise PDK::CLI::ExitWithError.new(message, opts)
       end
       module_function :ensure_in_module!
-
-      def spinner_opts_for_platform
-        windows_opts = {
-          success_mark: '*',
-          error_mark: 'X',
-        }
-
-        return windows_opts if Gem.win_platform?
-        {}
-      end
-      module_function :spinner_opts_for_platform
 
       def prompt_for_yes(question_text, opts = {})
         require 'tty/prompt'
@@ -79,8 +67,6 @@ module PDK
       module_function :ci_environment?
 
       def interactive?
-        require 'pdk/logger'
-
         return false if PDK.logger.debug?
         return !PDK::Util::Env['PDK_FRONTEND'].casecmp('noninteractive').zero? if PDK::Util::Env['PDK_FRONTEND']
         return false if ci_environment?

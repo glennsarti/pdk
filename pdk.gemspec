@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = 'A CLI to facilitate easy, unified development workflows for Puppet modules.'
   spec.homepage    = 'https://github.com/puppetlabs/pdk'
 
-  spec.files         = Dir['CHANGELOG.md', 'README.md', 'LICENSE', 'lib/**/*', 'exe/**/*', 'locales/**/*']
+  spec.files         = Dir['CHANGELOG.md', 'README.md', 'LICENSE', 'lib/**/*', 'exe/**/*', 'locales/**/*', 'vendor/pdk-plugin-core/*']
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']

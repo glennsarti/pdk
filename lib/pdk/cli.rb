@@ -127,12 +127,12 @@ module PDK::CLI
     default_subcommand 'help'
 
     flag nil, :version, _('Show version of pdk.') do |_, _|
-      puts PDK::Util::Version.version_string
+      PDK.ui.puts PDK::Util::Version.version_string
       exit 0
     end
 
     flag :h, :help, _('Show help for this command.') do |_, c|
-      puts c.help
+      PDK.ui.puts c.help
       exit 0
     end
 
@@ -158,16 +158,18 @@ module PDK::CLI
   end
 
   require 'pdk/cli/bundle'
-  require 'pdk/cli/build'
+  #require 'pdk/cli/build'
   require 'pdk/cli/config'
   require 'pdk/cli/convert'
-  require 'pdk/cli/new'
+  #require 'pdk/cli/new'
   require 'pdk/cli/test'
   require 'pdk/cli/update'
   require 'pdk/cli/validate'
-  require 'pdk/cli/module'
-  require 'pdk/cli/console'
-  require 'pdk/cli/release'
+  # require 'pdk/cli/module'
+  #require 'pdk/cli/console'
+  #require 'pdk/cli/release'
+
+  PDK::PluginManager.instance.activate_plugin_type!('cli')
 
   @base_cmd.add_command Cri::Command.new_basic_help
 end

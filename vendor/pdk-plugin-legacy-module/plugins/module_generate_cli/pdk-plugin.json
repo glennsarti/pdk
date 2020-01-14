@@ -1,0 +1,6 @@
+{
+  "name": "module_generate_cli",
+  "plugin_type": "cli",
+  "dependencies": ["module_cli", "new_module_cli"],
+  "root_file": "module_generate_cli.rb"
+}

@@ -11,6 +11,11 @@ else
   gem 'nokogiri', '~> 1.10.4' # rubocop:disable Bundler/DuplicatedGem
 end
 
+# TODO: Figure out some dynamic loading coz this is next level dodgey!
+Dir.glob(File.join(__dir__, 'vendor', '/*')).each do |path|
+  gem File.basename(path), path: path, require: false
+end
+
 group :development do
   gem 'activesupport', '4.2.9'
   gem 'github_changelog_generator', '~> 1.14'

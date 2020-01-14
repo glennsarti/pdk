@@ -3,66 +3,64 @@ require 'pdk'
 module PDK
   module CLI
     class ExecGroup
-      def initialize(message, opts = {})
-        require 'pdk/cli/util'
-        @options = opts.merge(PDK::CLI::Util.spinner_opts_for_platform)
-
-        if PDK::CLI::Util.interactive?
-          require 'pdk/cli/util/spinner'
-
-          @spinner = if parallel?
-                       TTY::Spinner::Multi.new("[:spinner] #{message}", @options)
-                     else
-                       TTY::Spinner.new("[:spinner] #{message}", @options)
-                     end
-          @spinner.auto_spin
+      def self.create(message, create_options = {}, group_opts = {})
+        if create_options[:parallel]
+          ParallelExecGroup.new(message, group_opts)
+        else
+          SerialExecGroup.new(message, group_opts)
         end
-
-        @threads_or_procs = []
-        @exit_codes = []
       end
 
-      def parallel?
-        @options[:parallel].nil? ? true : @options[:parallel]
+      def initialize(_message, opts = {})
+        @options = opts
       end
 
       def register(&block)
         raise PDK::CLI::FatalError, _('No block registered') unless block_given?
-
-        @threads_or_procs << if parallel?
-                               Thread.new do
-                                 GettextSetup.initialize(File.absolute_path('../../../locales', File.dirname(__FILE__)))
-                                 GettextSetup.negotiate_locale!(GettextSetup.candidate_locales)
-                                 @exit_codes << yield
-                               end
-                             else
-                               block
-                             end
       end
 
-      def add_spinner(message, opts = {})
-        require 'pdk/cli/util'
+      def exit_code; end
+    end
 
-        return unless PDK::CLI::Util.interactive?
-        @spinner.register("[:spinner] #{message}", @options.merge(opts).merge(PDK::CLI::Util.spinner_opts_for_platform))
+    class SerialExecGroup < ExecGroup
+      def initialize(message, opts = {})
+        super(message, opts)
+        @procs = []
+      end
+
+      def register(&block)
+        super(&block)
+
+        @procs << block
       end
 
       def exit_code
-        if parallel?
-          @threads_or_procs.each(&:join)
-        else
-          @exit_codes = @threads_or_procs.map(&:call)
-        end
+        exit_codes = @procs.map(&:call)
+        exit_codes.nil? ? 0 : exit_codes.max
+      end
+    end
 
-        exit_code = @exit_codes.max
+    class ParallelExecGroup < ExecGroup
+      def initialize(message, opts = {})
+        super(message, opts)
+        @threads = []
+        @exit_codes = []
+      end
 
-        if exit_code.zero? && @spinner
-          @spinner.success
-        elsif @spinner
-          @spinner.error
-        end
+      def register(&block)
+        super(&block)
 
-        exit_code
+        @threads << Thread.new do
+                               GettextSetup.initialize(File.absolute_path('../../../locales', File.dirname(__FILE__)))
+                               GettextSetup.negotiate_locale!(GettextSetup.candidate_locales)
+                               @exit_codes << yield
+                             end
+      end
+
+      def exit_code
+        @threads.each(&:join)
+        return 0 if @exit_codes.empty?
+        @exit_codes.max
       end
     end
   end

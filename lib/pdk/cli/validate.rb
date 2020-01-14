@@ -26,7 +26,7 @@ module PDK::CLI
 
       require 'pdk/validate'
 
-      validator_names = PDK::Validate.validators.map { |v| v.name }
+      validator_names = PDK::Validate.validators.map { |v| v.new.name }
       validators = PDK::Validate.validators
       targets = []
 
@@ -81,7 +81,6 @@ module PDK::CLI
       # Subsequent arguments are targets.
       targets.concat(args.to_a[1..-1]) if args.length > 1
 
-      report = PDK::Report.new
       report_formats = if opts[:format]
                          PDK::CLI::Util::OptionNormalizer.report_formats(opts[:format])
                        else
@@ -104,31 +103,13 @@ module PDK::CLI
 
       PDK::Util::Bundler.ensure_bundle!(puppet_env[:gemset])
 
-      exit_code = 0
-      if opts[:parallel]
-        require 'pdk/cli/exec_group'
-
-        exec_group = PDK::CLI::ExecGroup.new(_('Validating module using %{num_of_threads} threads' % { num_of_threads: validators.count }), opts)
-
-        validators.each do |validator|
-          exec_group.register do
-            validator.invoke(report, options.merge(exec_group: exec_group))
-          end
-        end
-
-        exit_code = exec_group.exit_code
-      else
-        validators.each do |validator|
-          validator_exit_code = validator.invoke(report, options.dup)
-          exit_code = validator_exit_code if validator_exit_code != 0
-        end
-      end
+      exit_code, report = PDK::Validate.invoke_validators(validators, opts[:parallel], options)
 
       report_formats.each do |format|
         report.send(format[:method], format[:target])
       end
 
-      exit exit_code
+      exit (exit_code.nil? ? -1 : exit_code)
     end
   end
 end

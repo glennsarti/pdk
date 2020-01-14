@@ -1,0 +1,6 @@
+{
+  "name": "module_builder",
+  "plugin_type": "builder",
+  "dependencies": [],
+  "root_file": "plugin.rb"
+}

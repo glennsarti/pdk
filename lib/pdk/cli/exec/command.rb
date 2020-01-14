@@ -9,6 +9,7 @@ module PDK
         attr_accessor :timeout
         attr_accessor :environment
         attr_writer :exec_group
+        attr_accessor :ui_job
 
         TEMPFILE_MODE = File::RDWR | File::BINARY | File::CREAT | File::TRUNC
 
@@ -35,6 +36,8 @@ module PDK
 
           # Register the ExecGroup when running in parallel
           @exec_group = nil
+
+          @ui_job = nil
         end
 
         def context=(new_context)
@@ -45,27 +48,27 @@ module PDK
           @context = new_context
         end
 
-        def register_spinner(spinner, opts = {})
-          require 'pdk/cli/util'
+#         def register_spinner(spinner, opts = {})
+#           require 'pdk/cli/util'
+# puts "!!!! register"
+#           return unless PDK::CLI::Util.interactive?
+#           @success_message = opts.delete(:success)
+#           @failure_message = opts.delete(:failure)
 
-          return unless PDK::CLI::Util.interactive?
-          @success_message = opts.delete(:success)
-          @failure_message = opts.delete(:failure)
+#           @spinner = spinner
+#         end
 
-          @spinner = spinner
-        end
+        # def add_spinner(message, opts = {})
+        #   require 'pdk/cli/util'
 
-        def add_spinner(message, opts = {})
-          require 'pdk/cli/util'
+        #   return unless PDK::CLI::Util.interactive?
+        #   @success_message = opts.delete(:success)
+        #   @failure_message = opts.delete(:failure)
 
-          return unless PDK::CLI::Util.interactive?
-          @success_message = opts.delete(:success)
-          @failure_message = opts.delete(:failure)
+        #   require 'pdk/cli/util/spinner'
 
-          require 'pdk/cli/util/spinner'
-
-          @spinner = TTY::Spinner.new("[:spinner] #{message}", opts.merge(PDK::CLI::Util.spinner_opts_for_platform))
-        end
+        #   @spinner = TTY::Spinner.new("[:spinner] #{message}", opts.merge(PDK::CLI::Util.spinner_opts_for_platform))
+        # end
 
         def update_environment(additional_env)
           @environment.merge!(additional_env)
@@ -73,7 +76,7 @@ module PDK
 
         def execute!
           # Start spinning if configured.
-          @spinner.auto_spin if @spinner
+          @ui_job.start if @ui_job
 
           # Set env for child process
           resolved_env_for_command.each { |k, v| @process.environment[k] = v }
@@ -83,7 +86,7 @@ module PDK
             mod_root = PDK::Util.module_root
 
             unless mod_root
-              @spinner.error if @spinner
+              @ui_job.error if @ui_job
 
               raise PDK::CLI::FatalError, _('Current working directory is not part of a module. (No metadata.json was found.)')
             end
@@ -99,8 +102,8 @@ module PDK
             run_process!
           end
 
-          # Stop spinning when done (if configured).
-          stop_spinner
+          # Stop ui job when done
+          stop_ui_job
 
           @stdout.rewind
           @stderr.rewind
@@ -182,16 +185,28 @@ module PDK
           resolved_env
         end
 
-        def stop_spinner
-          return unless @spinner
+        # @api private
+        def stop_ui_job
+          return unless @ui_job
 
           # If it is a single spinner, we need to send it a success/error message
           if @process.exit_code.zero?
-            @spinner.success(@success_message || '')
+            @ui_job.stop(true, @success_message || '')
           else
-            @spinner.error(@failure_message || '')
+            @ui_job.stop(false, @failure_message || '')
           end
         end
+
+        # def stop_spinner
+        #   return unless @spinner
+
+        #   # If it is a single spinner, we need to send it a success/error message
+        #   if @process.exit_code.zero?
+        #     @spinner.success(@success_message || '')
+        #   else
+        #     @spinner.error(@failure_message || '')
+        #   end
+        # end
 
         def run_process_in_clean_env!
           require 'bundler'

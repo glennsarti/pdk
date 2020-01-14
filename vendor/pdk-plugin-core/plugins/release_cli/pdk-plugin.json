@@ -1,0 +1,6 @@
+{
+  "name": "release_cli",
+  "plugin_type": "cli",
+  "dependencies": [],
+  "root_file": "release_cli.rb"
+}

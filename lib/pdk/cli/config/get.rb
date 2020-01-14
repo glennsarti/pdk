@@ -14,11 +14,11 @@ module PDK::CLI
       end
       # If the user requested a setting and it's the only one resolved, then just output the value
       if resolved_config.count == 1 && resolved_config.keys[0] == item_name
-        puts _('%{value}') % { value: resolved_config.values[0] }
+        PDK.ui.puts _('%{value}') % { value: resolved_config.values[0] }
         exit 0
       end
       # Otherwise just output everything
-      resolved_config.keys.sort.each { |key| puts _('%{name}=%{value}') % { name: key, value: resolved_config[key] } }
+      resolved_config.keys.sort.each { |key| PDK.ui.puts _('%{name}=%{value}') % { name: key, value: resolved_config[key] } }
     end
   end
 end

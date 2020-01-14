@@ -1,0 +1,6 @@
+{
+  "name": "testpattern_cli",
+  "plugin_type": "cli",
+  "dependencies": [],
+  "root_file": "testpattern_cli.rb"
+}

@@ -22,7 +22,7 @@ module PDK
 
         command = PDK::CLI::Exec::Command.new(*argv).tap do |c|
           c.context = :module
-          c.add_spinner(_('Examining module contents'))
+          c.ui_job = PDK.ui.register_job('Examining module contents')
         end
 
         command.execute!
@@ -30,13 +30,15 @@ module PDK
 
       # Generates and parses the JSON output from puppet-strings.
       #
+      # @param root_path [String] The path for puppet-strings to start in. Currently not implemented
+      #
       # @returns [Hash{String=>Object}] the parsed puppet-strings output.
       #
       # @raises [PDK::Util::PuppetStrings::RunError] if the puppet-strings
       #   command exits non-zero.
       # @raises [PDK::Util::PuppetStrings::RunError] if the puppet-strings
       #   command outputs invalid JSON.
-      def self.generate_hash
+      def self.generate_hash(_root_path = nil)
         result = puppet('strings', 'generate', '--format', 'json')
 
         raise RunError, result[:stderr] unless result[:exit_code].zero?
@@ -45,6 +47,21 @@ module PDK
       rescue JSON::ParserError => e
         PDK.logger.debug(e)
         raise RunError, _('Unable to parse puppet-strings output')
+      end
+
+      # Searches the puppet-strings result to find the definitions of the named
+      # objects.
+      #
+      # @param name [Array[String]] the name of the object definitions to search for.
+      #   If the object name is not prepended with the module name,
+      #   "#{module_name}::#{object_name}" will also be search for.
+      #
+      # @returns [Array[String]] the puppet-strings object types found for the object_names.
+      def self.puppet_string_types_for_object_names(object_names)
+        known_objects = generate_hash
+        known_objects.keys.select do |obj_type|
+          known_objects[obj_type].any? { |obj| object_names.include?(obj['name']) }
+        end
       end
 
       # Searches the puppet-strings result to find the definition of the named
@@ -63,6 +80,7 @@ module PDK
       # @raises [PDK::Util::PuppetStrings::NoGeneratorError] if the named
       #   object does not have a corresponding PDK generator class.
       def self.find_object(name)
+raise "DEPRECATED!!!!!"
         module_name = PDK::Util.module_metadata['name'].rpartition('-').last
 
         object_names = [name]
@@ -91,6 +109,8 @@ module PDK
       def self.all_objects
         require 'pdk/generate'
 
+# TODO:
+raise "THIS IS BROKEN!!!!!!!!!!!!!!!!!!!!!"
         generators = PDK::Generate.generators.select do |gen|
           gen.respond_to?(:puppet_strings_type) && !gen.puppet_strings_type.nil?
         end
@@ -116,6 +136,8 @@ module PDK
       def self.find_generator(type)
         require 'pdk/generate'
 
+# TODO:
+raise "THIS IS BROKEN!!!!!!!!!!!!!!!!!!!!!"
         PDK::Generate.generators.find do |gen|
           gen.respond_to?(:puppet_strings_type) && gen.puppet_strings_type == type
         end

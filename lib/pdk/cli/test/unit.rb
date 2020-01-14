@@ -49,18 +49,18 @@ module PDK::CLI
         examples = PDK::Test::Unit.list(opts)
 
         if examples.empty?
-          puts _('No unit test files with examples were found.')
+          PDK.ui.puts _('No unit test files with examples were found.')
         else
-          puts _('Unit Test Files:')
+          PDK.ui.puts _('Unit Test Files:')
           files = examples.map { |example| example[:file_path] }
           files.uniq.each do |file|
-            puts _(file)
+            PDK.ui.puts _(file)
 
             next unless opts[:verbose]
 
             file_examples = examples.select { |example| example[:file_path] == file }
             file_examples.each do |file_example|
-              puts _("\t%{id}\t%{description}" % { id: file_example[:id], description: file_example[:full_description] })
+              PDK.ui.puts _("\t%{id}\t%{description}" % { id: file_example[:id], description: file_example[:full_description] })
             end
           end
         end

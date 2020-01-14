@@ -1,0 +1,6 @@
+{
+  "name": "ruby_validator",
+  "plugin_type": "validator",
+  "dependencies": [],
+  "root_file": "plugin.rb"
+}
