@@ -5,7 +5,7 @@
   Author            = "Puppet, Inc"
   CompanyName       = "Puppet, Inc"
   Copyright         = '(c) <%= Time.new.year %> Puppet, Inc. All rights reserved'
-  FunctionsToExport = @('PENDING')
+  FunctionsToExport = @(<%= pdk_pwsh_commands.map { |c| "'#{c['function_name']}'" }.compact.join(', ') %>)
   CmdletsToExport   = @()
   VariablesToExport = @()
   AliasesToExport   = @()

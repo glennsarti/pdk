@@ -2,46 +2,68 @@ require 'pdk'
 
 module PDK
   module UI
-    class PowershellUIJob < UIJob
-      #@@text_job_id = 1
+    def self.stdout_mutex
+      @stdout_mutex ||= Mutex.new
+    end
 
+    def self.stderr_mutex
+      @stderr_mutex ||= Mutex.new
+    end
+
+    class PowershellUIJob < UIJob
       def initialize(*_)
         super
-        # TODO: This is horrible
-        # @this_job_id = "%03d" % @@text_job_id
-        # @@text_job_id += 1
+        @text_job_id = "job#{object_id}".freeze
       end
 
-      # def depth
-      #   parent_job.nil? ? 0 : parent_job.depth + 1
-      # end
+      def job_id
+        @text_job_id
+      end
 
       def stop(success, _ = nil)
         super
-        # text = "(#{@this_job_id}) " + ("  " * depth) + message
-        # if success
-        #   text += " completed with success"
-        # else
-        #   text += " completed with an error"
-        # end
-        # PDK.ui.puts(text)
-        text = "PDKPSUI:STOPJOB:#{object_id}:"
-        text += success ? 'TRUE' : 'FALSE'
-        $stdout.puts(text)
+
+        text = "PDKPSUI:STOPJOB:#{job_id}:"
+        text += success ? 'TRUE:' : 'FALSE:'
+        text += message.to_s
+        PDK::UI.stdout_mutex.synchronize do
+          $stdout.puts(text)
+        end
+        parent_job.update unless parent_job.nil?
       end
 
       def start
-       super
-       text = "PDKPSUI:STARTJOB:#{object_id}:#{message}"
-       $stdout.puts(text)
+        super
+        text = "PDKPSUI:STARTJOB:#{job_id}:"
+        text += (parent_job.nil? ? '' : parent_job.job_id) + ':'
+        text += message.to_s
+        PDK::UI.stdout_mutex.synchronize do
+          $stdout.puts(text)
+        end
+        parent_job.update unless parent_job.nil?
+      end
+
+      def update(_message = nil)
+        super
+        text = "PDKPSUI:UPDATEJOB:#{job_id}:"
+        complete = -1
+        unless child_jobs.empty?
+          completed_jobs = child_jobs.select { |job| job.completed? }
+          complete = ((completed_jobs.count * 100.0) / child_jobs.count).truncate
+        end
+        text += "#{complete}:#{message}"
+
+        PDK::UI.stdout_mutex.synchronize do
+          $stdout.puts(text)
+        end
       end
     end
 
     class Powershell < ::PDK::UI::BaseUI
       def initialize(*_)
         super
-        @stdout_mutex = Mutex.new
-        @stderr_mutex = Mutex.new
+        $stdout.sync = true
+        $stdout.binmode unless $stdout.binmode
       end
 
       def job_klass
@@ -49,33 +71,16 @@ module PDK
       end
 
       def puts(*args)
-        # BRIGHT YELLOW PLEASE? Maybe?
-        @stdout_mutex.synchronize do
-          #$stdout.write "\e[33m"
-          #$stdout.write "\e[0m"
+        PDK::UI.stdout_mutex.synchronize do
           $stdout.puts args
-          #$stdout.write "\e[0m"
         end
       end
 
       def stderr_puts(*args)
-        # BRIGHT RED PLEASE
-        @stderr_mutex.synchronize do
-          #$stderr.write "\e[35m"
+        PDK::UI.stderr_mutex.synchronize do
           $stderr.puts args
-          #$stderr.write "\e[0m"
         end
       end
-
-      # def job_default_options
-      #   return @job_default_options.dup unless @job_default_options.nil?
-      #   @job_default_options = {}
-      #   return @job_default_options.dup unless Gem.win_platform?
-      #   # Windows Terminal and VSCode both support pretty emojis and extended characters
-      #   return @job_default_options.dup if ENV['WT_SESSION'] || ENV['TERM_PROGRAM'] == 'vscode'
-      #   @job_default_options = { success_mark: '*', error_mark: 'X' }
-      #   @job_default_options.dup
-      # end
     end
   end
 end

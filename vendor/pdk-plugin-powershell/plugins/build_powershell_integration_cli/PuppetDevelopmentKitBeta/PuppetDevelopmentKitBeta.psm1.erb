@@ -105,6 +105,7 @@ end
 $invokePDKSource = @"
 using System;
 using System.Diagnostics;
+using System.Collections;
 using System.Management.Automation;
 
 namespace Puppet
@@ -112,10 +113,13 @@ namespace Puppet
   public class PDKInvoker
   {
     private System.Management.Automation.Host.PSHostUserInterface _psUI;
+    private long _progressSourceID;
+    private System.Collections.Generic.Dictionary<string,int> _activities = new System.Collections.Generic.Dictionary<string,int>();
 
     public PDKInvoker(System.Management.Automation.Host.PSHostUserInterface psUI)
     {
       _psUI = psUI;
+      _progressSourceID = (new Random()).Next();
     }
 
     public void InvokePDK(string rubyPath, string[] pdkArguments, string workingDir)
@@ -139,6 +143,7 @@ namespace Puppet
 
       _psUI.WriteVerboseLine(String.Format("Using PDK comamand line {0}", String.Join(" ", pdkArguments)));
 
+      _activities.Clear();
       process.Start();
       process.BeginOutputReadLine();
       process.BeginErrorReadLine();
@@ -153,45 +158,113 @@ namespace Puppet
       if (outLine.Data == null) { return; }
       string line = outLine.Data;
       if (line.Trim() == "") { return; }
-      if (line.StartsWith("PDKPSLOGGER:")) {
-        // 0 = PDKPSLOGGER prefix
-        // 1 = Severity level
-        // 2 = Message Length (Minus newline)
-        // 3 = Message Text
-        string[] structuredLog = line.Split(":", 4);
 
-        switch (structuredLog[1])
-        {
-          case "FATAL":
-          case "ERROR":
-            _psUI.WriteErrorLine(structuredLog[3]);
-            break;
-          case "WARN":
-            _psUI.WriteWarningLine(structuredLog[3]);
-            break;
-          default:
-            _psUI.WriteLine(structuredLog[3]);
-            break;
-        }
+      if (line.StartsWith("PDKPSLOGGER:")) {
+        ProcessLoggerLine(line);
         return;
       }
+
+      if (line.StartsWith("PDKPSUI:")) {
+        ProcessUILine(line);
+        return;
+      }
+
       // Just output the line if it's not structured data
       _psUI.WriteLine(line);
+    }
 
-      <%# if (structuredLog[1] = )
+    private void ProcessLoggerLine(string line)
+    {
+      // 0 = PDKPSLOGGER prefix
+      // 1 = Severity level
+      // 2 = Message Length (Minus newline)
+      // 3 = Message Text
+      string[] structuredLog = line.Split(":", 4);
+
+      switch (structuredLog[1])
       {
-        _psUI.WriteVerboseLine(line.Substring(12));
+        case "FATAL":
+        case "ERROR":
+          _psUI.WriteErrorLine(structuredLog[3]);
+          break;
+        case "WARN":
+          _psUI.WriteWarningLine(structuredLog[3]);
+          break;
+        default:
+          _psUI.WriteLine(structuredLog[3]);
+          break;
       }
-      else if (line.StartsWith("pdk (WARN): "))
+      return;
+    }
+
+    private void ProcessUILine(string line)
+    {
+      // 0 = PDKPSUI prefix
+      // 1 = Action
+      // 2 = JobID
+      // 3 = Action Specific
+      string[] uiInfo = line.Split(":", 4);
+      int activityId = -1;
+      System.Management.Automation.ProgressRecord record = null;
+      string[] actionInfo;
+
+      switch (uiInfo[1])
       {
-        _psUI.WriteWarningLine(line.Substring(12));
+        case "STARTJOB":
+          // 0 = ParentJobID (Blank = Root Job)
+          // 1 = Message Text
+          actionInfo = uiInfo[3].Split(":", 2);
+          activityId = (new Random()).Next();
+          _activities[uiInfo[2]] = activityId;
+
+          record = new System.Management.Automation.ProgressRecord(activityId, actionInfo[1], "Running...");
+          record.RecordType = System.Management.Automation.ProgressRecordType.Processing;
+          if ( (actionInfo[0] != "") && (_activities.ContainsKey(actionInfo[0])) ) {
+            record.ParentActivityId = _activities[actionInfo[0]];
+          }
+
+          _psUI.WriteProgress(_progressSourceID, record);
+          break;
+
+        case "STOPJOB":
+          // 0 = Finished with success (TRUE or FALSE)
+          // 1 = Message Text
+          actionInfo = uiInfo[3].Split(":", 2);
+
+          if (_activities.ContainsKey(uiInfo[2])) {
+            activityId = _activities[uiInfo[2]];
+          }
+          if (activityId == -1) { return; }
+
+          record = new System.Management.Automation.ProgressRecord(activityId, actionInfo[1], "Finished");
+          record.RecordType = System.Management.Automation.ProgressRecordType.Completed;
+
+          _psUI.WriteProgress(_progressSourceID, record);
+          break;
+
+        case "UPDATEJOB":
+          // 0 = PercentComplete (int)
+          // 1 = Message Text
+          actionInfo = uiInfo[3].Split(":", 2);
+
+          if (_activities.ContainsKey(uiInfo[2])) {
+            activityId = _activities[uiInfo[2]];
+          }
+          if (activityId == -1) { return; }
+
+          record = new System.Management.Automation.ProgressRecord(activityId, actionInfo[1], "Running...");
+          //record.RecordType = System.Management.Automation.ProgressRecordType.Processing;
+          record.PercentComplete = int.Parse(actionInfo[0]);
+
+          _psUI.WriteProgress(_progressSourceID, record);
+          break;
+
+        default:
+          // Shouldn't get here
+          _psUI.WriteErrorLine(line);
+          break;
       }
-      else
-      {
-        _psUI.WriteLine(line);
-      } %>
-
-
+      return;
     }
 
     private void ErrorOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

@@ -11,12 +11,10 @@ else
   gem 'nokogiri', '~> 1.10.4' # rubocop:disable Bundler/DuplicatedGem
 end
 
-# TODO: Figure out some dynamic loading?
-gem 'pdk-plugin-core',           path: 'vendor/pdk-plugin-core'
-gem 'pdk-plugin-legacy-module',  path: 'vendor/pdk-plugin-legacy-module'
-gem 'pdk-plugin-module-builder', path: 'vendor/pdk-plugin-module-builder'
-gem 'pdk-plugin-powershell',     path: 'vendor/pdk-plugin-powershell'
-gem 'puppet_module_builder',     path: 'vendor/puppet_module_builder'
+# TODO: Figure out some dynamic loading coz this is next level dodgey!
+Dir.glob(File.join(__dir__, 'vendor', '/*')).each do |path|
+  gem File.basename(path), path: path, require: false
+end
 
 group :development do
   gem 'activesupport', '4.2.9'

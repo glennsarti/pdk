@@ -44,9 +44,16 @@ module PDK
         @parent_job = parent_job
         @child_jobs = []
         @options = options
+        @completed = false
       end
 
-      def stop(_success, _message = nil); end
+      def completed?
+        @completed
+      end
+
+      def stop(_success, _message = nil)
+        @completed = true
+      end
 
       def start; end
 

@@ -79,7 +79,7 @@ module PDK
       end
 
       def validators
-        [BogusValidator2sec, BogusValidator7sec].freeze
+        [BogusValidator2sec, BogusValidator2sec, BogusValidator2sec, BogusValidator2sec, BogusValidator2sec, BogusValidator2sec, BogusValidator2sec, BogusValidator7sec].freeze
       end
     end
 

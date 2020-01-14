@@ -30,7 +30,8 @@ module PDKCorePlugins
         option nil, 'force', _('Skips the prompts and builds the module package.')
 
         run do |opts, _args, _cmd|
-          output_dir = 'C:\Source\pdk-plugin\tmp\PSModules'
+          # TODO: '~/Documents/PowerShell/Modules' is Windows specific and is prone to `My Documents` folder redirection
+          output_dir  = opts[:'target-dir'].nil? ? File.expand_path('~/Documents/PowerShell/Modules') : File.expand_path(opts[:'target-dir'])
 
           PDK.logger.info _('Building powershell module to %{path}') % {
             path: output_dir,
@@ -46,8 +47,6 @@ module PDKCorePlugins
             item.pdk_pwsh_commands = plugin_instance.cri_to_powershell_hash(plugin_instance.describe_base_command)
             item.pdk_version = PDK::VERSION
           end
-
-          #puts data.binding
 
           # For each PowerShell Module to create
           %w[PuppetDevelopmentKitBeta].each do |module_dir|

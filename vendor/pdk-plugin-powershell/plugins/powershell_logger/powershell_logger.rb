@@ -1,5 +1,5 @@
-# require 'logger'
-# require 'pdk'
+require 'logger'
+require 'pdk'
 
 module PDK
   module Logger
@@ -10,6 +10,7 @@ module PDK
         super($stdout)
         # Flush msgs immediately
         $stdout.sync = true
+        $stdout.binmode unless $stdout.binmode
 
         @sent_messages = {}
 
